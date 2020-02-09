@@ -9,6 +9,6 @@ public class NoteDTO {
 	public String text;
 	public Date dateCreated;
 	public Date dateEdited;
-	public Long userId;
+	public Long OwnerId;
 
 }

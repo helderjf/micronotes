@@ -11,10 +11,11 @@ public class Note {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
 	private String title;
-	@Lob
 	private String text;
 	private Date dateCreated;
 	private Date dateEdited;
+	@ManyToOne(fetch=FetchType.LAZY)
+	private User owner;
 
 	/**
 	 * @return the id
@@ -85,5 +86,19 @@ public class Note {
 	public void setDateEdited(Date dateEdited) {
 		this.dateEdited = dateEdited;
 	}
+
+    /**
+     * @return the owner
+     */
+    public User getOwner() {
+        return owner;
+    }
+
+    /**
+     * @param owner the owner to set
+     */
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
 	
 }

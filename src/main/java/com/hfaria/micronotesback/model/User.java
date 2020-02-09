@@ -1,8 +1,5 @@
 package com.hfaria.micronotesback.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -11,7 +8,8 @@ import javax.validation.constraints.NotNull;
 @Table(name="USERS")
 public class User {
 
-	@Id
+
+    @Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
 	@NotBlank
@@ -27,9 +25,22 @@ public class User {
 	@NotBlank
 	@NotNull
 	private String encriptedPassword;
-	@OneToMany(cascade = CascadeType.ALL,orphanRemoval = true)
-	@JoinColumn(name="user_id")
-	private List<Note> notes = new ArrayList<Note>();
+	
+	
+	
+	
+	/**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
+    /**
+     * @param id the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 	
 	/**
 	 * @return the firstName

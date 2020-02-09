@@ -59,11 +59,11 @@ public class AuthenticationService {
 		return jwtService.getToken(authenticationObj);
 	}
 	
-	public Optional<org.springframework.security.core.userdetails.User> getCurrentUser(){
-	    
-	    return Optional.of(
-	            ((org.springframework.security.core.userdetails.User)
-	            SecurityContextHolder.getContext().getAuthentication().getPrincipal()));
+	public Optional<User> getCurrentUser(){
+	    org.springframework.security.core.userdetails.User appUser = 
+	                ((org.springframework.security.core.userdetails.User)
+	            SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+	    return userRepository.findByEmail(appUser.getUsername());
 	}
 
 }
