@@ -54,11 +54,12 @@ public class NoteService {
     
     private NoteDTO toDTO(Note note) {
         NoteDTO dto = new NoteDTO();
-        dto.id=note.getId();
+        dto.id=note.getId().toString();
         dto.text=note.getText();
         dto.title=note.getTitle();
-        dto.dateCreated=note.getDateCreated();
-        dto.dateEdited=note.getDateEdited();
+        dto.dateCreated=note.getDateCreated().toString();
+        dto.dateEdited=note.getDateEdited().toString();
+        dto.ownerId=note.getOwner().getId().toString();
         return dto;
     }
     
@@ -91,7 +92,7 @@ public class NoteService {
     }
 
     public Note updateNote(NoteDTO updatedNoteDTO) {
-        Note note = noteRepository.findById(updatedNoteDTO.id).get();
+        Note note = noteRepository.findById(Long.parseLong(updatedNoteDTO.id)).get();
         note.setDateEdited(new Date());
         note.setTitle(updatedNoteDTO.title);
         note.setText(updatedNoteDTO.text);

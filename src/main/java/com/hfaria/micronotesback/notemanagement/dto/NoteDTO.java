@@ -4,11 +4,11 @@ import java.util.Date;
 
 public class NoteDTO {
 
-	public Long id;
+	public String id;
 	public String title;
 	public String text;
-	public Date dateCreated;
-	public Date dateEdited;
-	public Long OwnerId;
+	public String dateCreated;
+	public String dateEdited;
+	public String ownerId;
 
 }
