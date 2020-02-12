@@ -18,52 +18,46 @@ import com.hfaria.micronotesback.repository.UserRepository;
 @Service
 public class AuthenticationService {
 
-	@Autowired
-	private UserRepository userRepository;
-	@Autowired
-	private PasswordEncoder passwordEnconder;
-	@Autowired
-	private AuthenticationManager authenticationManager;
-	@Autowired
-	private JWTService jwtService;
-	
-	
-	public boolean registerNewUser(RegistryRequestDTO registryRequest) {
-		User newUser = new User();
-		newUser.setFirstName(registryRequest.getFirstName());
-		newUser.setLastName(registryRequest.getLastName());
-		newUser.setEmail(registryRequest.getEmail());
-		newUser.setEncriptedPassword(encriptPassword(registryRequest.getPassword()));
-		
-		try {
-			userRepository.save(newUser).toString();
-		} catch (Exception e) {
-			return false;
-		}
-		return true;
-		
-	}
-	
-	public boolean authenticate() {
-		return true;
-	}
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEnconder;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private JWTService jwtService;
 
-	
-	private String encriptPassword(String password) {
-		return passwordEnconder.encode(password);
-	}
+    public boolean registerNewUser(RegistryRequestDTO registryRequest) {
+        User newUser = new User();
+        newUser.setFirstName(registryRequest.firstName);
+        newUser.setLastName(registryRequest.lastName);
+        newUser.setEmail(registryRequest.email);
+        newUser.setEncriptedPassword(encriptPassword(registryRequest.password));
 
-	public String login(LoginRequestDTO loginRequest) {
-		Authentication authenticationObj = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-		SecurityContextHolder.getContext().setAuthentication(authenticationObj);
-		return jwtService.getToken(authenticationObj);
-	}
-	
-	public Optional<User> getCurrentUser(){
-	    org.springframework.security.core.userdetails.User appUser = 
-	                ((org.springframework.security.core.userdetails.User)
-	            SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-	    return userRepository.findByEmail(appUser.getUsername());
-	}
+        try {
+            userRepository.save(newUser).toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    private String encriptPassword(String password) {
+        return passwordEnconder.encode(password);
+    }
+
+    public String login(LoginRequestDTO loginRequest) {
+        Authentication authenticationObj = authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.email, loginRequest.password));
+        SecurityContextHolder.getContext().setAuthentication(authenticationObj);
+        return jwtService.getToken(authenticationObj);
+    }
+
+    public Optional<User> getCurrentUser() {
+        org.springframework.security.core.userdetails.User appUser = ((org.springframework.security.core.userdetails.User) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal());
+        return userRepository.findByEmail(appUser.getUsername());
+    }
 
 }
