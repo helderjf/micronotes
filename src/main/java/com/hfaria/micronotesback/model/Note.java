@@ -2,6 +2,8 @@ package com.hfaria.micronotesback.model;
 
 import java.util.Date;
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name="NOTES")
@@ -10,7 +12,11 @@ public class Note {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
+	@NotBlank
+    @NotNull
 	private String title;
+	@NotBlank
+    @NotNull
 	private String text;
 	private Date dateCreated;
 	private Date dateEdited;
