@@ -40,28 +40,17 @@ public class NoteService {
         List<Note> notes = noteRepository.findByOwner(owner).get();
         List<NoteDTO> dtoNotes = new ArrayList<NoteDTO>();
         for (Note note : notes) {
-            dtoNotes.add(toDTO(note));
+            dtoNotes.add(new NoteDTO(note));
         }
-        
         return dtoNotes;
     }
 
 
     public NoteDTO getNoteDTO(Long id) {
         Note note = noteRepository.findById(id).get();
-        return toDTO(note);
+        return new NoteDTO(note);
     }
     
-    private NoteDTO toDTO(Note note) {
-        NoteDTO dto = new NoteDTO();
-        dto.id=note.getId().toString();
-        dto.text=note.getText();
-        dto.title=note.getTitle();
-        dto.dateCreated=note.getDateCreated().toString();
-        dto.dateEdited=note.getDateEdited().toString();
-        dto.ownerId=note.getOwner().getId().toString();
-        return dto;
-    }
     
 //    public boolean isOwner(Long noteId, Long ownerId) {
 //        Note note = noteRepository.findById(noteId).get();
@@ -77,7 +66,7 @@ public class NoteService {
     public NoteDTO getNoteDTOFromOwner(Long noteId, Long ownerId) {
         Note note = noteRepository.findById(noteId).get();
         if(note.getOwner().getId().equals(ownerId)) {
-            return toDTO(note);
+            return new NoteDTO(note);
         }
         return null;
     }
