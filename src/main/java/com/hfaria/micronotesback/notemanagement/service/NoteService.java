@@ -82,10 +82,14 @@ public class NoteService {
 
     public Note updateNote(NoteDTO updatedNoteDTO) {
         Note note = noteRepository.findById(Long.parseLong(updatedNoteDTO.id)).get();
-        note.setDateEdited(new Date());
-        note.setTitle(updatedNoteDTO.title);
-        note.setText(updatedNoteDTO.text);
-        noteRepository.save(note);
+        User currentUser = getCurrentUser();
+        
+        if(currentUser.equals(note.getOwner())) {
+            note.setTitle(updatedNoteDTO.title);
+            note.setText(updatedNoteDTO.text);
+            note.setDateEdited(new Date());
+            noteRepository.save(note);
+        }
         return note;
     }
 	

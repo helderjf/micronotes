@@ -68,9 +68,9 @@ public class NoteController {
 
     
     @PutMapping(path = "/{id}")
-    public ResponseEntity<Note> editNote(@RequestBody NoteDTO updatedNoteDTO) {
-        Note updatedNote = noteService.updateNote(updatedNoteDTO);
-        return new ResponseEntity<Note>(updatedNote,HttpStatus.OK);
+    public ResponseEntity<NoteDTO> editNote(@RequestBody NoteDTO editedNoteDTO) {
+        NoteDTO updatedNoteDTO = new NoteDTO(noteService.updateNote(editedNoteDTO));
+        return new ResponseEntity<NoteDTO>(updatedNoteDTO,HttpStatus.OK);
     }
 
     private User getCurrentUser() {
