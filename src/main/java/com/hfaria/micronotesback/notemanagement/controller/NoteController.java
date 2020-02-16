@@ -73,7 +73,7 @@ public class NoteController {
 
     
     @GetMapping(path = "/{id}")
-    public ResponseEntity<NoteDTO> viewNote(@PathVariable @RequestBody Long id) {
+    public ResponseEntity<NoteDTO> getNote(@PathVariable @RequestBody Long id) {
         User owner = getCurrentUser();
         
         try {

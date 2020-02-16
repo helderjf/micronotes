@@ -23,7 +23,7 @@ public class NoteService {
     private AuthenticationService authenticationService;
 
     public Note createNote(NoteDTO noteDTO, User owner) throws Exception {
-        if (!checkIntegrityForUpdate(noteDTO)) {
+        if (!checkIntegrityForCreate(noteDTO)) {
             throw new NoteException("Invalid parameters");
         }
         Note newNote = new Note();
@@ -44,10 +44,7 @@ public class NoteService {
         return notes;
     }
 
-    public NoteDTO getNoteDTO(Long id) {
-        Note note = noteRepository.findById(id).get();
-        return new NoteDTO(note);
-    }
+
 
     private User getCurrentUser() {
         User owner = authenticationService.getCurrentUser()
