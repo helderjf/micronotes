@@ -11,86 +11,110 @@ import com.hfaria.micronotesback.authentication.service.AuthenticationService;
 import com.hfaria.micronotesback.model.Note;
 import com.hfaria.micronotesback.model.User;
 import com.hfaria.micronotesback.notemanagement.dto.NoteDTO;
+import com.hfaria.micronotesback.notemanagement.exception.NoteException;
 import com.hfaria.micronotesback.repository.NoteRepository;
 
 @Service
 public class NoteService {
 
-	@Autowired
-	private NoteRepository noteRepository;
-	@Autowired
-	private AuthenticationService authenticationService;
-	
-	public Note createNote(NoteDTO note) {
-		Note newNote = new Note();
-		newNote.setTitle(note.title);
-		newNote.setText(note.text);
-		newNote.setDateCreated(new Date());
-		newNote.setDateEdited(new Date());
-		
-		User owner = authenticationService.getCurrentUser()
-		        .orElseThrow(()-> new IllegalArgumentException("No user loggedin."));
-		newNote.setOwner(owner);
-		
-		return noteRepository.save(newNote);
-	}
+    @Autowired
+    private NoteRepository noteRepository;
+    @Autowired
+    private AuthenticationService authenticationService;
 
-    public List<NoteDTO> getUserNotesDTO() {
-        User owner = getCurrentUser();
-        List<Note> notes = noteRepository.findByOwner(owner).get();
-        List<NoteDTO> dtoNotes = new ArrayList<NoteDTO>();
-        for (Note note : notes) {
-            dtoNotes.add(new NoteDTO(note));
+    public Note createNote(NoteDTO noteDTO, User owner) throws Exception {
+        if (!checkIntegrityForUpdate(noteDTO)) {
+            throw new NoteException("Invalid parameters");
         }
-        return dtoNotes;
+        Note newNote = new Note();
+        newNote.setTitle(noteDTO.title);
+        newNote.setText(noteDTO.text);
+        newNote.setDateCreated(new Date());
+        newNote.setDateEdited(new Date());
+        newNote.setOwner(owner);
+
+        return noteRepository.save(newNote);
     }
 
+    public List<Note> getUserNotes(User owner) throws Exception {
+
+        List<Note> notes;
+        notes = noteRepository.findByOwner(owner).orElse(new ArrayList<Note>());
+
+        return notes;
+    }
 
     public NoteDTO getNoteDTO(Long id) {
         Note note = noteRepository.findById(id).get();
         return new NoteDTO(note);
     }
-    
-    
-//    public boolean isOwner(Long noteId, Long ownerId) {
-//        Note note = noteRepository.findById(noteId).get();
-//        return note.getOwner().getId().equals(ownerId);
-//    }
-	
+
     private User getCurrentUser() {
         User owner = authenticationService.getCurrentUser()
-                .orElseThrow(()-> new IllegalArgumentException("No user loggedin."));
+                .orElseThrow(() -> new IllegalArgumentException("No user loggedin."));
         return owner;
     }
 
-    public NoteDTO getNoteDTOFromOwner(Long noteId, Long ownerId) {
+    public Note getNoteFromOwner(Long noteId, User owner) throws Exception {
         Note note = noteRepository.findById(noteId).get();
-        if(note.getOwner().getId().equals(ownerId)) {
-            return new NoteDTO(note);
+        if (note.getOwner().getId().equals(owner.getId())) {
+            return note;
         }
         return null;
     }
 
-    public boolean deleteNoteFromOwner(Long noteId, Long ownerId) {
-        Note note = noteRepository.findById(noteId).get();
-        if(note.getOwner().getId().equals(ownerId)) {
+    public boolean deleteNoteFromOwner(Long noteId, User owner) throws NoteException, Exception {
+        Note note;
+        note = noteRepository.findById(noteId).get();
+        if (note.getOwner().getId().equals(owner.getId())) {
             noteRepository.deleteById(noteId);
             return true;
+        } else {
+            throw new NoteException("User has no permission to delete this note");
         }
-        return false;
     }
 
-    public Note updateNote(NoteDTO updatedNoteDTO) {
-        Note note = noteRepository.findById(Long.parseLong(updatedNoteDTO.id)).get();
+    public Note updateNote(NoteDTO updatedNoteDTO) throws NoteException, Exception {
+        if (!checkIntegrityForUpdate(updatedNoteDTO)) {
+            throw new NoteException("Invalid parameters");
+        }
+        Note note;
+        note = noteRepository.findById(Long.parseLong(updatedNoteDTO.id)).get();
         User currentUser = getCurrentUser();
-        
-        if(currentUser.equals(note.getOwner())) {
+
+        if (currentUser.equals(note.getOwner())) {
             note.setTitle(updatedNoteDTO.title);
             note.setText(updatedNoteDTO.text);
             note.setDateEdited(new Date());
             noteRepository.save(note);
+        } else {
+            throw new NoteException("User has no permission to edit this note");
         }
         return note;
     }
-	
+
+    private boolean checkIntegrityForCreate(NoteDTO noteDTO) {
+        if (noteDTO == null 
+                || noteDTO.text == null 
+                || noteDTO.title == null) {
+            return false;
+        } else if (noteDTO.text.trim().length() == 0 || noteDTO.title.trim().length() == 0) {
+            return false;
+        }
+        return true;
+    }
+    
+    
+    private boolean checkIntegrityForUpdate(NoteDTO noteDTO) {
+        if (noteDTO == null 
+                || noteDTO.text == null 
+                || noteDTO.title == null
+                || noteDTO.id == null) {
+            return false;
+        } else if (noteDTO.text.trim().length() == 0 || noteDTO.title.trim().length() == 0) {
+            return false;
+        }
+        return true;
+    }
+
 }

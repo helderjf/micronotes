@@ -1,5 +1,7 @@
 package com.hfaria.micronotesback.notemanagement.controller;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import com.hfaria.micronotesback.authentication.service.AuthenticationService;
 import com.hfaria.micronotesback.model.Note;
 import com.hfaria.micronotesback.model.User;
 import com.hfaria.micronotesback.notemanagement.dto.NoteDTO;
+import com.hfaria.micronotesback.notemanagement.exception.NoteException;
 import com.hfaria.micronotesback.notemanagement.service.NoteService;
 
 @RestController
@@ -29,50 +32,111 @@ public class NoteController {
     @Autowired
     private AuthenticationService authenticationService;
 
-    @GetMapping(path = "/hello")
-    public String hello() {
-        return "Hello Notes!";
-    }
-
+    
+    
     @PostMapping(path = "/create")
-    public ResponseEntity<Note> createNote(@RequestBody NoteDTO note) {
-        noteService.createNote(note);
-        return new ResponseEntity<Note>(HttpStatus.OK);
+    public ResponseEntity<NoteDTO> createNote(@RequestBody NoteDTO noteDTO) {
+        User owner = getCurrentUser();
+        
+        try {
+            Note newNote = noteService.createNote(noteDTO, owner);
+            return new ResponseEntity<NoteDTO>(new NoteDTO(newNote),HttpStatus.CREATED);
+            
+        } catch (NoteException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
+        }
+        
     }
 
+    
+    
+    
+    
     @GetMapping(path = "/all")
-    public ResponseEntity<List<NoteDTO>> showUserNotes() {
-        List<NoteDTO> notes = noteService.getUserNotesDTO();
-        return new ResponseEntity<List<NoteDTO>>(notes, HttpStatus.OK);
+    public ResponseEntity<List<NoteDTO>> getUserNotes() {
+        User owner = getCurrentUser();
+        List<Note> notes;
+        List<NoteDTO> noteDTOs = new ArrayList<NoteDTO>();
+        try {
+            notes = noteService.getUserNotes(owner);
+            noteDTOs=NoteDTO.toDtoList(notes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
+        }
+        return new ResponseEntity<List<NoteDTO>>(noteDTOs, HttpStatus.OK);
     }
 
+    
     @GetMapping(path = "/{id}")
     public ResponseEntity<NoteDTO> viewNote(@PathVariable @RequestBody Long id) {
-        User user = getCurrentUser();
-        NoteDTO note = noteService.getNoteDTOFromOwner(id, user.getId());
-        if (note != null) {
-            return new ResponseEntity<NoteDTO>(note, HttpStatus.OK);
+        User owner = getCurrentUser();
+        
+        try {
+            Note note = noteService.getNoteFromOwner(id, owner);
+            NoteDTO dto = new NoteDTO(note);
+            return new ResponseEntity<NoteDTO>(dto, HttpStatus.OK);
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
+        } catch (Exception e ) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<NoteDTO>(HttpStatus.BAD_REQUEST);
+        
     }
 
+    
+    
+    
+    
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<Object> deleteNote(@PathVariable @RequestBody Long id) {
-        User user = getCurrentUser();
+        User owner = getCurrentUser();
 
-        if (noteService.deleteNoteFromOwner(id, user.getId())) {
-            return new ResponseEntity<Object>(HttpStatus.OK);
+        try {
+            if (noteService.deleteNoteFromOwner(id, owner)) {
+                return new ResponseEntity<Object>(HttpStatus.OK);
+            }
+        } catch (NoteException e) {
+            e.printStackTrace();
+            return new ResponseEntity<Object>(HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<Object>(HttpStatus.SERVICE_UNAVAILABLE);
         }
         return new ResponseEntity<Object>(HttpStatus.BAD_REQUEST);
     }
 
     
+    
+    
+    
     @PutMapping(path = "/{id}")
     public ResponseEntity<NoteDTO> editNote(@RequestBody NoteDTO editedNoteDTO) {
-        NoteDTO updatedNoteDTO = new NoteDTO(noteService.updateNote(editedNoteDTO));
-        return new ResponseEntity<NoteDTO>(updatedNoteDTO,HttpStatus.OK);
+        
+        try {
+             NoteDTO updatedNoteDTO = new NoteDTO(noteService.updateNote(editedNoteDTO));
+            return new ResponseEntity<NoteDTO>(updatedNoteDTO,HttpStatus.OK);
+        } catch (NoteException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
+        }
+        
     }
 
+    
+    
+    
+    
     private User getCurrentUser() {
         User user = authenticationService.getCurrentUser()
                 .orElseThrow(() -> new IllegalArgumentException("No user logged in."));
