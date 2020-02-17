@@ -81,12 +81,12 @@ public class NoteController {
             NoteDTO dto = new NoteDTO(note);
             return new ResponseEntity<NoteDTO>(dto, HttpStatus.OK);
             
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
-        } catch (Exception e ) {
+        } catch (NoteException e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (Exception e ) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
         }
         
     }

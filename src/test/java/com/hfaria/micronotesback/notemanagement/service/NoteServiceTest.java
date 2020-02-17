@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.hfaria.micronotesback.model.Note;
 import com.hfaria.micronotesback.model.User;
+import com.hfaria.micronotesback.notemanagement.exception.NoteException;
 import com.hfaria.micronotesback.repository.NoteRepository;
 
 class NoteServiceTest {
@@ -105,15 +107,10 @@ class NoteServiceTest {
         
         given(noteRepository.findById(1l)).willReturn(noteOptional);
         
-        Note result;
-        
-        try {
-            result = noteService.getNoteFromOwner(1l, user2);
-        } catch (Exception e) {
-            result = null;
-        }
-        
-        assertNull(result);
+        assertThrows(NoteException.class, 
+                ()->{
+            noteService.getNoteFromOwner(1l, user2);
+        });
     }
 
 }

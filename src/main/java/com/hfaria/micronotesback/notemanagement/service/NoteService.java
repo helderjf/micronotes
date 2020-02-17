@@ -52,12 +52,12 @@ public class NoteService {
         return owner;
     }
 
-    public Note getNoteFromOwner(Long noteId, User owner) throws Exception {
+    public Note getNoteFromOwner(Long noteId, User owner) throws NoteException, Exception {
         Note note = noteRepository.findById(noteId).get();
         if (note.getOwner().getId().equals(owner.getId())) {
             return note;
         }
-        return null;
+        throw new NoteException("User has no permission to access this note");
     }
 
     public boolean deleteNoteFromOwner(Long noteId, User owner) throws NoteException, Exception {
